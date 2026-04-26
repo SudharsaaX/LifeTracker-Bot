@@ -1,0 +1,1273 @@
+{
+  "name": "LifeTracker Bot – Production",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2272,
+        336
+      ],
+      "id": "0d4f7014-5547-48bd-a9c3-1494d00d901d",
+      "name": "Telegram Trigger",
+      "webhookId": "REPLACE_WITH_YOUR_WEBHOOK_ID",
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "voice-check",
+              "leftValue": "={{ $json.message.voice !== undefined && $json.message.voice !== null }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2048,
+        336
+      ],
+      "id": "061335d8-c588-47fc-88ad-1e333262305a",
+      "name": "Is Voice Message?"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1952,
+        0
+      ],
+      "id": "0e021573-9762-4fc3-90f9-164fbc81dabc",
+      "name": "Telegram – Get Voice File",
+      "webhookId": "REPLACE_WITH_YOUR_WEBHOOK_ID",
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-transcript-text",
+              "name": "message.text",
+              "value": "={{ ($json.text || '').trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1328,
+        224
+      ],
+      "id": "d188d4a0-ba2f-40c7-bd18-4358830e1ba4",
+      "name": "Normalize – Transcript Text"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are an expert speech-to-text correction and normalization AI.\n\nYour job:\n- Convert the given text into clear, simple English.\n- The input may be in ANY language (Telugu, Hindi, Tamil, Tanglish, mixed, broken English, noisy speech).\n- ALWAYS translate to English.\n- Fix grammar and clarity.\n- Keep it SHORT and DIRECT.\n\nIf the sentence contains numbers and time (hours, minutes), preserve them correctly.\n\n-----------------------------------\n\nSTRICT RULES:\n- Output ONLY the corrected English sentence\n- Do NOT explain anything\n- Do NOT add extra words\n- Do NOT ask questions\n- Do NOT change meaning\n\n-----------------------------------\n\nFocus on activity tracking sentences like:\n- \"i studied 2 hours\"\n- \"i worked out for 1 hour\"\n- \"i coded for 5 hours\"\n\n\nTANGLISH EXAMPLES (VERY IMPORTANT):\n\nInput: na two 2hours padichen  \nOutput: i studied for 2 hours  \n\nInput: na coding 3 hours pannen  \nOutput: i coded for 3 hours  \n\nInput: na gym 1 hour ponen  \nOutput: i worked out for 1 hour  \n\nInput: na youtube 2 hours paathen  \nOutput: i watched youtube for 2 hours  \n\nInput: na movie 3 hours paathen  \nOutput: i watched a movie for 3 hours  \n\n-----------------------------------"
+            },
+            {
+              "content": "={{ $json.message.text }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -1120,
+        224
+      ],
+      "id": "5e0af25b-17b2-4381-bf44-c51a11d2f327",
+      "name": "GPT – Correct Transcript",
+      "credentials": {
+        "openAiApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-corrected-text",
+              "name": "message.text",
+              "value": "={{ ($json.output?.[0]?.content?.[0]?.text || '').trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -800,
+        224
+      ],
+      "id": "9a25eb0c-0245-46b0-971f-796c35543e26",
+      "name": "Normalize – Corrected Text"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "passthrough-text",
+              "name": "message.text",
+              "value": "={{ ($json.message.text || '').trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "passthrough-chat-id",
+              "name": "message.chat.id",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1728,
+        352
+      ],
+      "id": "a1e0701c-0985-4381-a5f9-35a3acf90295",
+      "name": "Normalize – Text Message"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "merge-text",
+              "name": "message.text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "merge-chat-id",
+              "name": "chatId",
+              "value": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -608,
+        368
+      ],
+      "id": "a41b5b61-758f-46ea-8c92-64da964844bd",
+      "name": "Merge – Unified Message"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a strict intent classifier.\n\nClassify the user message into ONLY ONE of these:\nMAIL, STUDY, ANALYTICS, QUESTION, CHAT\n\n-----------------------------------\n\nSTUDY (HIGHEST PRIORITY):\nAny activity tracking message MUST be classified as STUDY.\n\nIncludes:\n- study, coding, workout, gym\n- sleep, eating, food, lunch, dinner\n- youtube, instagram, movies, gaming\n- travel, work, reading, productivity\n\nRules:\n- If message contains ANY activity → STUDY\n- If message contains time (hour, hours, hr, hrs, minutes) → STUDY\n- Even partial sentences → STUDY\n\nExamples:\n- i studied 2 hours → STUDY\n- i ate food → STUDY\n- gym 1 hr → STUDY\n- youtube 30 mins → STUDY\n\n-----------------------------------\n\nANALYTICS:\nUser asking about THEIR tracked data.\n\nIncludes:\n- today, yesterday, week, total, summary\n- how much, how many hours, stats, report\n\nExamples:\n- how many hours i studied today → ANALYTICS\n- show my coding stats → ANALYTICS\n- what did i do yesterday → ANALYTICS\n\n-----------------------------------\n\nQUESTION:\nGeneral knowledge questions (NOT about user's data)\n\nExamples:\n- what is rag → QUESTION\n- explain ai → QUESTION\n- what is machine learning → QUESTION\n\n-----------------------------------\n\nMAIL:\nEmails, inbox, messages\n\n-----------------------------------\n\nCHAT:\nCasual conversation ONLY (no activity, no question, no analytics)\n\nExamples:\n- hi\n- hello bro\n- what's up\n\n-----------------------------------\n\nCRITICAL RULES:\n\n1. STUDY has highest priority\n2. If BOTH activity + question → STUDY\n   Example: \"i studied 2 hours what now\" → STUDY\n\n3. If asking about personal data → ANALYTICS\n4. If general knowledge → QUESTION\n5. If nothing matches → CHAT\n\n-----------------------------------\n\nOUTPUT RULE:\n\nReturn ONLY one word:\nMAIL or STUDY or ANALYTICS or QUESTION or CHAT\n\nDO NOT explain.\nDO NOT add extra text."
+            },
+            {
+              "content": "=={{ ($json.message.text || \"\").toLowerCase().trim() }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -432,
+        368
+      ],
+      "id": "4b570fbc-b8f8-4a66-a3e1-098f3cfec450",
+      "name": "GPT – Classify Intent",
+      "credentials": {
+        "openAiApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-intent",
+              "name": "intent",
+              "value": "={{ ($json.output?.[0]?.content?.[0]?.text || 'CHAT').trim().toUpperCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "set-text-from-intent",
+              "name": "text",
+              "value": "={{ $('Merge – Unified Message').item.json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "set-chat-id",
+              "name": "chatId",
+              "value": "={{ $('Merge – Unified Message').item.json.chatId }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -128,
+        368
+      ],
+      "id": "adc83fa5-2a74-428c-89c1-cb3a945ee5f9",
+      "name": "Set – Intent + Text"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "intent-mail",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "MAIL",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "MAIL"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "intent-study",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "STUDY",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "STUDY"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c4ae9cd8-d0be-4004-ac49-e29ee6314301",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "ANALYTICS",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ANALYTICS"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "intent-question",
+                    "leftValue": "="{{ $json.intent }}",
+                    "rightValue": "QUESTION",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "QUESTION"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "CHAT"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        80,
+        352
+      ],
+      "id": "7ff12e0f-eaf8-4ec0-ba8e-6707d618b7d1",
+      "name": "Route – By Intent"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 10,
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        352,
+        48
+      ],
+      "id": "60134052-94ae-4db6-98c2-23dc48e1c07f",
+      "name": "Gmail – Fetch Inbox",
+      "webhookId": "REPLACE_WITH_YOUR_WEBHOOK_ID",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const emails = items.map((item, i) => ({\n  index: i + 1,\n  subject: item.json.Subject || item.json.subject || \"(No subject)\",\n  from: item.json.From || item.json.from || \"Unknown\",\n  snippet: item.json.Snippet || item.json.snippet || item.json.Text || item.json.Body || \"(No preview)\"\n}));\n\nreturn [{ json: { emails } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        592,
+        48
+      ],
+      "id": "3c940947-edb8-44c9-a348-5100dbf696e8",
+      "name": "Prepare – Email List"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are an intelligent email analyzer for a college student.\n\nYour job:\n- Identify important emails (placements, internships, exams, deadlines, offers, results)\n- Ignore spam, promotions, newsletters, LinkedIn alerts\n\nReturn ONLY valid JSON in this exact format:\n{\n  \"important\": true,\n  \"emails\": [\n    {\n      \"title\": \"Email subject or short title\",\n      \"company\": \"Company name or empty string\",\n      \"type\": \"placement|internship|exam|deadline|result|other\",\n      \"summary\": \"One sentence summary\"\n    }\n  ]\n}\n\nIf no important emails:\n{\n  \"important\": false,\n  \"emails\": []\n}\n\nIMPORTANT: Return ONLY pure JSON. No markdown, no backticks, no explanation."
+            },
+            {
+              "content": "=Here are the emails:\n\n{{ JSON.stringify($json.emails, null, 2) }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        800,
+        48
+      ],
+      "id": "e5168d44-1d7c-4fdc-b786-d55086bb9e7b",
+      "name": "GPT – Analyze Emails",
+      "credentials": {
+        "openAiApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let raw = '';\ntry {\n  raw = ($json.output?.[0]?.content?.[0]?.text || '').trim();\n} catch (e) {\n  raw = '';\n}\n\nlet data;\ntry {\n  data = JSON.parse(raw);\n} catch (e) {\n  data = { important: false, emails: [] };\n}\n\nif (typeof data.important !== 'boolean') data.important = false;\nif (!Array.isArray(data.emails)) data.emails = [];\n\nreturn [{ json: data }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        48
+      ],
+      "id": "deac8d35-efa4-4430-ac31-269ca0a9feaf",
+      "name": "Parse – Email Analysis"
+    },
+    {
+      "parameters": {
+        "chatId": "={{$node[\"Telegram Trigger\"].json[\"message\"][\"chat\"][\"id\"]}}",
+        "text": "={{\n(() => {\n  if (!$json.important || !Array.isArray($json.emails) || $json.emails.length === 0) {\n    return '📭 No important emails found in your inbox.';\n  }\n  let msg = '📬 *Important Emails*\\n\\n';\n  $json.emails.forEach((e, i) => {\n    msg += `${i + 1}. *${e.title || 'Untitled'}*\\n`;\n    if (e.company) msg += `   🏢 ${e.company}\\n`;\n    msg += `   📌 ${e.type || 'other'}\\n`;\n    msg += `   ${e.summary || ''}\\n\\n`;\n  });\n  return msg.trim();\n})()\n}}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1312,
+        48
+      ],
+      "id": "51daf32a-d50c-4591-b795-d87b806ec388",
+      "name": "Telegram – Send Email Summary",
+      "webhookId": "REPLACE_WITH_YOUR_WEBHOOK_ID",
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are an advanced activity classification and extraction engine.\n\nYour job:\nFrom the given English sentence, extract:\n1. activity type\n2. duration in hours (number)\n\nReturn ONLY JSON:\n{\"type\":\"<type>\",\"value\":<number>}\n\n-----------------------------------\n\nSUPPORTED TYPES:\n\nproductivity:\n- study\n- coding\n- work\n- reading\n- writing\n- learning\n\nfitness:\n- gym\n- workout\n- running\n- walking\n- sports\n\nentertainment:\n- youtube\n- instagram\n- social_media\n- movies\n- series\n- gaming\n- music\n\ngeneral:\n- sleep\n- eating\n- travel\n- personal\n\nfallback:\n- other\n\n-----------------------------------\n\nMAPPING RULES (VERY IMPORTANT):\n\ncoding:\n- code, coding, programming, development\n\nstudy:\n- study, studied, learning, revision, practice\n\ngym:\n- workout, gym, exercise, training\n\nyoutube:\n- youtube, watching videos\n\ninstagram:\n- instagram, reels, scrolling\n\nmovies:\n- movie, cinema, film\n\nseries:\n- series, tv show\n\ngaming:\n- game, gaming, played\n\nsocial_media:\n- whatsapp, facebook, chatting, scrolling\n\nproductivity:\n- productive work without specific category\n\n-----------------------------------\n\nCRITICAL RULES:\n\n1. ALWAYS detect correct category\n2. NEVER return \"other\" if any keyword matches\n3. Extract correct number (hours, minutes → convert to hours)\n   - \"30 minutes\" → 0.5\n4. If no number → default value = 1\n5. Output MUST be valid JSON\n6. Output ONLY JSON (no text, no explanation)\n\n-----------------------------------\n\nEXAMPLES:\n\nInput: i code for 6 hours  \nOutput: {\"type\":\"coding\",\"value\":6}\n\nInput: i watched youtube for 2 hours  \nOutput: {\"type\":\"youtube\",\"value\":2}\n\nInput: i used instagram 30 minutes  \nOutput: {\"type\":\"instagram\",\"value\":0.5}\n\nInput: i watched a movie  \nOutput: {\"type\":\"movies\",\"value\":1}\n\nInput: i studied  \nOutput: {\"type\":\"study\",\"value\":1}"
+            },
+            {
+              "content": "=={{ ($json.text || \"\").toString().toLowerCase().trim() }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        720,
+        368
+      ],
+      "id": "30d6d882-969b-456e-9357-7eee8f8c56c7",
+      "name": "GPT – Extract Activity",
+      "credentials": {
+        "openAiApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "extract-type",
+              "name": "type",
+              "value": "={{\n(() => {\n  try {\n    const parsed = JSON.parse(($json.output?.[0]?.content?.[0]?.text || '').trim());\n    return (parsed.type || 'other').toLowerCase();\n  } catch (e) {\n    return 'other';\n  }\n})()\n}}",
+              "type": "string"
+            },
+            {
+              "id": "extract-value",
+              "name": "value",
+              "value": "={{\n(() => {\n  try {\n    const raw = $json.output?.[0]?.content?.[0]?.text || \"{}\";\n    const parsed = JSON.parse(raw);\n    const v = parseFloat(parsed.value);\n    return isNaN(v) ? 1 : v;\n  } catch {\n    return 1;\n  }\n})()\n}}",
+              "type": "number"
+            },
+            {
+              "id": "extract-date",
+              "name": "date",
+              "value": "={{ $now }}",
+              "type": "string"
+            },
+            {
+              "id": "extract-chat-id",
+              "name": "chatId",
+              "value": "={{ $('Set – Intent + Text').item.json.chatId }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        992,
+        368
+      ],
+      "id": "2a0280f8-7923-4da0-9b5a-99cb51613eaa",
+      "name": "Set – Activity Fields"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "LifeData",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Data": "={{ $json.date }}",
+            "Type": "={{ $json.type }}",
+            "Value": "={{ $json.value }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Type",
+              "displayName": "Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Value",
+              "displayName": "Value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1200,
+        368
+      ],
+      "id": "50d3e5ee-ca9d-4325-ba07-2083cc4dd19b",
+      "name": "Google Sheets – Log Activity",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{$node[\"Telegram Trigger\"].json[\"message\"][\"chat\"][\"id\"]}}",
+        "text": "={{\n(() => {\n  const data = $('Set – Activity Fields').item.json;\n\n  // Activity\n  const type = (data.type || 'other').toLowerCase();\n\n  // Duration\n  const value = parseFloat(data.value) || 1;\n  const durationText = `${value} ${value === 1 ? 'hour' : 'hours'}`;\n\n  // Tamil Nadu Time (Asia/Kolkata)\n  const d = new Date();\n  const options = {\n    timeZone: 'Asia/Kolkata',\n    day: '2-digit',\n    month: '2-digit',\n    year: 'numeric',\n    hour: '2-digit',\n    minute: '2-digit',\n    second: '2-digit',\n    hour12: true\n  };\n\n  let formattedDate = d.toLocaleString('en-GB', options)\n    .replace('AM', 'am')\n    .replace('PM', 'pm');\n\n  return `✅ Entry Saved\n\n📌 Activity: ${type}\n⏱ Duration: ${durationText}\n📅 ${formattedDate}\n\nKeep going 🚀`;\n})()\n}}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1440,
+        368
+      ],
+      "id": "bf79eb95-3556-4d57-8697-e8b8cb4fefb0",
+      "name": "Telegram – Confirm Activity Saved",
+      "webhookId": "REPLACE_WITH_YOUR_WEBHOOK_ID",
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const allData = items.map(item => ({\n  type: (item.json.Type || 'other').toLowerCase().trim(),\n  value: parseFloat(item.json.Value) || 0,\n  date: item.json.Data || ''\n})).filter(d => d.type && d.value > 0);\n\nreturn [{ json: { allData } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        624
+      ],
+      "id": "2f372b0d-5326-45fc-8c10-581f028a66f1",
+      "name": "Prepare – Analytics Data"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are an intelligent personal productivity and life analytics assistant.\n\nYou receive:\n- User question\n- Activity data (type, value, date)\n\nYour job is to understand ANY question and give a relevant, useful answer based on the data.\n\n---\nSMART CATEGORY MAPPING:\n\nPRODUCTIVITY: study, coding, programming, debugging, testing, project, assignment, research, learning, reading, writing, meeting, presentation\n\nHEALTH: gym, workout, exercise, running, walking, yoga, fitness, sleep, nap, meditation, stretching\n\nFOOD: food, breakfast, lunch, dinner, snack, water, cooking\n\nENTERTAINMENT: youtube, gaming, social_media, movie, browsing, netflix, music\n\nSOCIAL: friends, family, call, chatting\n\nTRAVEL: travel, commute, driving\n\n---\nGUIDELINES:\n- Match the user's question to the right category\n- Use only relevant data for category-specific questions\n- Use all data for general summary questions\n- Give short, clear, human-like responses\n- Add one helpful suggestion when appropriate\n- Only say 'Not enough data' if there is truly zero relevant data\n- Use emojis sparingly for readability"
+            },
+            {
+              "content": "=User question: {{ $json.text }}\n\nActivity data:\n{{ JSON.stringify($json.allData, null, 2) }}\n\nAnswer the user's question based on this data. Be concise and insightful."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        1136,
+        624
+      ],
+      "id": "c0cf0d4a-ca66-4e99-820e-583978694aa8",
+      "name": "GPT – Answer Analytics Question",
+      "credentials": {
+        "openAiApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{$node[\"Telegram Trigger\"].json[\"message\"][\"chat\"][\"id\"]}}",
+        "text": "={{ ($json.output?.[0]?.content?.[0]?.text || 'Sorry, I could not analyze your data right now.').trim() }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1456,
+        624
+      ],
+      "id": "eb11bc44-51bc-45d1-b978-ca911cd33ed2",
+      "name": "Telegram – Send Analytics Answer",
+      "webhookId": "REPLACE_WITH_YOUR_WEBHOOK_ID",
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a smart, friendly AI assistant integrated inside a personal productivity tracker.\n\nYour personality:\n- Friendly, natural, slightly casual (like a helpful friend)\n- Clear and confident (not robotic)\n- Supportive and motivating\n\nYour job:\n- Answer questions clearly and simply\n- Keep responses SHORT (max 2–3 sentences)\n- Be helpful without over-explaining\n\n-----------------------------------\n\nCONTEXT AWARENESS:\n\nThis system is mainly used for:\n- Tracking activities (study, coding, gym, etc.)\n- Productivity and daily life logging\n\nSo:\n- If user asks something → answer clearly\n- If user talks casually → reply friendly\n- If user seems confused → simplify explanation\n- If user mentions goals/productivity → encourage briefly\n\n-----------------------------------\n\nSTYLE RULES:\n\n- Use simple English (easy to understand)\n- Avoid long paragraphs\n- Avoid complex words unless needed\n- No unnecessary details\n- No emojis unless it feels natural (max 1)\n\n-----------------------------------\n\nBEHAVIOR RULES:\n\n- Do NOT be overly formal\n- Do NOT give long lectures\n- Do NOT go off-topic\n- Do NOT ask too many follow-up questions\n\n-----------------------------------\n\nEXAMPLES:\n\nUser: what is decision  \nReply: A decision is choosing one option from different choices. Simple — it's picking what to do.\n\nUser: i feel lazy  \nReply: Happens to everyone. Start small — even 10 minutes is enough to get going.\n\nUser: what is coding  \nReply: Coding is writing instructions for computers to perform tasks. It's how apps and websites are built.\n\n\nIf the user previously logged activities, you can occasionally relate answers to productivity or improvement."
+            },
+            {
+              "content": "={{ $json.text }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        384,
+        816
+      ],
+      "id": "043c05b5-4112-4edc-a047-b9476f3b2769",
+      "name": "GPT – Chat Reply",
+      "credentials": {
+        "openAiApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{$node[\"Telegram Trigger\"].json[\"message\"][\"chat\"][\"id\"]}}",
+        "text": "={{ ($json.output?.[0]?.content?.[0]?.text || 'Hey! How can I help you?').trim() }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        816,
+        896
+      ],
+      "id": "6a26fbca-4734-4bb8-a4da-cd34d68bd7fc",
+      "name": "Telegram – Send Chat Reply",
+      "webhookId": "REPLACE_WITH_YOUR_WEBHOOK_ID",
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.assemblyai.com/v2/upload",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"authorization\": \"{{ $env.ASSEMBLYAI_API_KEY }}\"\n}",
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1744,
+        0
+      ],
+      "id": "16088306-affa-4be5-a942-551c4c9e39a4",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.assemblyai.com/v2/transcript",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"authorization\": \"{{ $env.ASSEMBLYAI_API_KEY }}\",\n  \"content-type\": \"application/json\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"audio_url\": \"{{ $json.upload_url }}\",\n  \"speech_models\": [\"universal-2\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1536,
+        0
+      ],
+      "id": "85f27fe1-0ed9-471b-90ea-ae8dbb6de3fb",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1328,
+        0
+      ],
+      "id": "4655a008-d1b8-42ad-9061-de27a7f014a7",
+      "name": "Wait",
+      "webhookId": "REPLACE_WITH_YOUR_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.assemblyai.com/v2/transcript/{{ $json.id }}",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"authorization\": \"{{ $env.ASSEMBLYAI_API_KEY }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1120,
+        0
+      ],
+      "id": "4b4145cd-d013-44e9-8b59-56d77016b60e",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "LifeData",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "options": {
+          "returnFirstMatch": false
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        608,
+        608
+      ],
+      "id": "86452491-efc1-4086-8936-56f699a3f237",
+      "name": "Google Sheets – Fetch All Data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Is Voice Message?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Voice Message?": {
+      "main": [
+        [
+          {
+            "node": "Telegram – Get Voice File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Normalize – Text Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram – Get Voice File": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize – Transcript Text": {
+      "main": [
+        [
+          {
+            "node": "GPT – Correct Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT – Correct Transcript": {
+      "main": [
+        [
+          {
+            "node": "Normalize – Corrected Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize – Corrected Text": {
+      "main": [
+        [
+          {
+            "node": "Merge – Unified Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize – Text Message": {
+      "main": [
+        [
+          {
+            "node": "Merge – Unified Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge – Unified Message": {
+      "main": [
+        [
+          {
+            "node": "GPT – Classify Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT – Classify Intent": {
+      "main": [
+        [
+          {
+            "node": "Set – Intent + Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set – Intent + Text": {
+      "main": [
+        [
+          {
+            "node": "Route – By Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route – By Intent": {
+      "main": [
+        [
+          {
+            "node": "Gmail – Fetch Inbox",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GPT – Extract Activity",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets – Fetch All Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GPT – Chat Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GPT – Chat Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail – Fetch Inbox": {
+      "main": [
+        [
+          {
+            "node": "Prepare – Email List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare – Email List": {
+      "main": [
+        [
+          {
+            "node": "GPT – Analyze Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT – Analyze Emails": {
+      "main": [
+        [
+          {
+            "node": "Parse – Email Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse – Email Analysis": {
+      "main": [
+        [
+          {
+            "node": "Telegram – Send Email Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT – Extract Activity": {
+      "main": [
+        [
+          {
+            "node": "Set – Activity Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set – Activity Fields": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets – Log Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets – Log Activity": {
+      "main": [
+        [
+          {
+            "node": "Telegram – Confirm Activity Saved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare – Analytics Data": {
+      "main": [
+        [
+          {
+            "node": "GPT – Answer Analytics Question",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT – Answer Analytics Question": {
+      "main": [
+        [
+          {
+            "node": "Telegram – Send Analytics Answer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT – Chat Reply": {
+      "main": [
+        [
+          {
+            "node": "Telegram – Send Chat Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Normalize – Transcript Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets – Fetch All Data": {
+      "main": [
+        [
+          {
+            "node": "Prepare – Analytics Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "REPLACE_WITH_YOUR_VERSION_ID",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "REPLACE_WITH_YOUR_INSTANCE_ID"
+  },
+  "id": "REPLACE_WITH_YOUR_WORKFLOW_ID",
+  "tags": []
+}
