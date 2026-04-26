@@ -191,12 +191,15 @@ Do not expose sensitive credentials.
 ---
 
 <p align="center">
-  <b>Author</b><br><br>
+  <img src="https://github.com/SudharsaaX.png" width="120" style="border-radius:50%" />
+</p>
+
+<h3 align="center">Sudharsan</h3>
+
+<p align="center">
   <a href="https://github.com/SudharsaaX">
     <img src="https://img.shields.io/badge/GitHub-SudharsaaX-181717?style=for-the-badge&logo=github"/>
   </a>
-  <br><br>
-  <img src="https://img.shields.io/github/followers/SudharsaaX?style=social"/>
 </p>
 
 ---
