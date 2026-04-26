@@ -170,6 +170,7 @@ I studied 2 hours
 I worked out for 1 hour
 How much did I code today?
 Any important emails?
+Even voice message 
 ```
 
 ---
@@ -177,7 +178,7 @@ Any important emails?
 ## Notes
 
 Replace all API keys with your own before running.
-Do not expose sensitive credentials.
+Do not expose sensitive credentials...
 
 ---
 
