@@ -78,20 +78,48 @@ LifeTracker-Bot/
 ---
 
 ## Screenshots
+## Telegram Interaction
 
-### Telegram Interaction
+### Full Interaction View
+
 <p align="center">
-  <img src="telegram_screenshots/telegram-0.jpeg"/>
+  <a href="telegram_screenshots/telegram-0.jpeg">
+    <img src="telegram_screenshots/telegram-0.jpeg" width="800"/>
+  </a>
 </p>
 
-<table>
-  <tr>
-    <td><img src="telegram_screenshots/telegram-2.jpeg" width="250"/></td>
-    <td><img src="telegram_screenshots/telegram-3.jpeg" width="250"/></td>
-  </tr>
-</table>
+---
+
+### Interaction Breakdown
+
+<p align="center">
+  <a href="telegram_screenshots/telegram-1.jpeg">
+    <img src="telegram_screenshots/telegram-1.jpeg" width="280"/>
+  </a>
+  <a href="telegram_screenshots/telegram-2.jpeg">
+    <img src="telegram_screenshots/telegram-2.jpeg" width="280"/>
+  </a>
+  <a href="telegram_screenshots/telegram-3.jpeg">
+    <img src="telegram_screenshots/telegram-3.jpeg" width="280"/>
+  </a>
+</p>
 
 ---
+
+### Additional Examples
+
+<p align="center">
+  <a href="telegram_screenshots/telegram-4.jpeg">
+    <img src="telegram_screenshots/telegram-4.jpeg" width="280"/>
+  </a>
+  <a href="telegram_screenshots/telegram-5.jpeg">
+    <img src="telegram_screenshots/telegram-5.jpeg" width="280"/>
+  </a>
+  <a href="telegram_screenshots/telegram-6.jpeg">
+    <img src="telegram_screenshots/telegram-6.jpeg" width="280"/>
+  </a>
+</p>
+
 
 ## Workflow Overview
 
