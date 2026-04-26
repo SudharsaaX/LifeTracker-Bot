@@ -82,7 +82,16 @@ LifeTracker-Bot/
 ### Telegram Bot Interaction
 
 ![Telegram Demo](telegram_screenshots/telegram-0.jpeg)
-
+<table>
+  <tr>
+    <td><img src="telegram_screenshots/telegram-0.jpeg" width="250"/></td>
+    <td><img src="telegram_screenshots/telegram-1.jpeg" width="250"/></td>
+  </tr>
+  <tr>
+    <td><img src="telegram_screenshots/telegram-2.jpeg" width="250"/></td>
+    <td><img src="telegram_screenshots/telegram-3.jpeg" width="250"/></td>
+  </tr>
+</table>
 
 
 ---
