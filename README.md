@@ -192,7 +192,11 @@ Do not expose sensitive credentials.
 
 ## Author
 
-Sudharsan
-https://github.com/SudharsaaX
+<p align="center">
+  <b>Author</b><br><br>
+  <a href="https://github.com/SudharsaaX">
+    <img src="https://img.shields.io/badge/GitHub-SudharsaaX-181717?style=for-the-badge&logo=github"/>
+  </a>
+</p>
 
 ---
