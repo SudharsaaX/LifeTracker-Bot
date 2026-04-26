@@ -79,9 +79,8 @@ LifeTracker-Bot/
 
 ## Screenshots
 
-### Telegram Bot Interaction
+### Telegram Interaction
 
-![Telegram Demo](telegram_screenshots/telegram-0.jpeg)
 <table>
   <tr>
     <td><img src="telegram_screenshots/telegram-0.jpeg" width="250"/></td>
@@ -93,13 +92,19 @@ LifeTracker-Bot/
   </tr>
 </table>
 
-
 ---
 
-### n8n Workflow
+## Workflow Overview
 
-![Workflow](workflow_screenshots/your-image-name.png)
+![Full Workflow](workflow_screenshots/complete-workflow.jpeg)
 
+## Workflow Breakdown
+
+<p align="center">
+  <img src="workflow_screenshots/workflow0.jpeg" width="280"/>
+  <img src="workflow_screenshots/workflow1.jpeg" width="280"/>
+  <img src="workflow_screenshots/workflow2.jpeg" width="280"/>
+</p>
 ---
 
 ## Example Usage
