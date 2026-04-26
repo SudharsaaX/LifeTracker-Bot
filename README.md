@@ -81,7 +81,7 @@ LifeTracker-Bot/
 
 ### Telegram Interaction
 <p align="center">
-  <img src="telegram_screenshots/telegram-0.jpeg" width="200"/>
+  <img src="telegram_screenshots/telegram-0.jpeg"/>
 </p>
 
 <table>
