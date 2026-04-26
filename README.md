@@ -1,32 +1,118 @@
 # LifeTracker Bot
 
-LifeTracker Bot is a simple productivity tracking system built using n8n, Telegram, and AI. It allows users to log daily activities using text or voice messages, automatically processes the input, and stores the data for later analysis.
+LifeTracker Bot is a productivity tracking system built using n8n, Telegram, and AI. It allows users to log daily activities through simple text or voice messages, automatically processes the input, and stores the data for later analysis.
 
-The goal of this project is to make activity tracking easy and natural, without relying on manual input or complex applications.
+The goal of this project is to make activity tracking simple, natural, and effortless.
 
 ---
 
 ## Overview
 
-Instead of opening apps and manually logging tasks, users can just send a message like:
+Instead of manually logging tasks, users can send messages like:
 
 * "I studied 2 hours"
 * "I coded for 3 hours"
-* or send a voice note
+* or a voice note
 
-The system understands the input, extracts useful information, and saves it in Google Sheets. It can also answer questions about productivity and filter important emails.
+The system understands the input, extracts useful data, and stores it in Google Sheets. It can also provide insights and filter important emails.
 
 ---
 
 ## Features
 
-* Supports both text and voice input
-* Converts voice messages into text
-* Uses AI to understand activities and duration
-* Automatically logs data into Google Sheets
-* Provides basic productivity insights
-* Filters important emails such as internships or deadlines
-* Includes a simple chat assistant
+* Text and voice-based activity logging
+* Speech-to-text conversion
+* AI-powered activity and time extraction
+* Automatic logging to Google Sheets
+* Productivity insights
+* Email importance detection
+* Simple AI chat assistant
+
+---
+
+## Telegram Interaction
+
+### Full Interaction
+
+<p align="center">
+  <a href="telegram_screenshots/telegram-0.jpeg">
+    <img src="telegram_screenshots/telegram-0.jpeg" width="800"/>
+  </a>
+</p>
+
+<p align="center"><i>Complete interaction showing activity tracking, analytics queries, and email checks.</i></p>
+
+---
+
+### Activity Logging
+
+<p align="center">
+  <a href="telegram_screenshots/telegram-1.jpeg">
+    <img src="telegram_screenshots/telegram-1.jpeg" width="280"/>
+  </a>
+  <a href="telegram_screenshots/telegram-2.jpeg">
+    <img src="telegram_screenshots/telegram-2.jpeg" width="280"/>
+  </a>
+</p>
+
+<p align="center"><i>Logging activities using simple text or voice messages. The system automatically detects type and duration.</i></p>
+
+---
+
+### Analytics and Insights
+
+<p align="center">
+  <a href="telegram_screenshots/telegram-3.jpeg">
+    <img src="telegram_screenshots/telegram-3.jpeg" width="280"/>
+  </a>
+  <a href="telegram_screenshots/telegram-4.jpeg">
+    <img src="telegram_screenshots/telegram-4.jpeg" width="280"/>
+  </a>
+</p>
+
+<p align="center"><i>Users can ask questions about their productivity and receive summarized insights.</i></p>
+
+---
+
+### Email Detection and Chat
+
+<p align="center">
+  <a href="telegram_screenshots/telegram-5.jpeg">
+    <img src="telegram_screenshots/telegram-5.jpeg" width="280"/>
+  </a>
+  <a href="telegram_screenshots/telegram-6.jpeg">
+    <img src="telegram_screenshots/telegram-6.jpeg" width="280"/>
+  </a>
+</p>
+
+<p align="center"><i>Detection of important emails and basic conversational chat support.</i></p>
+
+---
+
+## Workflow Overview
+
+<p align="center">
+  <a href="workflow_screenshots/complete-workflow.jpeg">
+    <img src="workflow_screenshots/complete-workflow.jpeg" width="900"/>
+  </a>
+</p>
+
+<p align="center"><i>Complete n8n workflow showing message processing, AI handling, and integrations.</i></p>
+
+---
+
+## Workflow Breakdown
+
+<p align="center">
+  <a href="workflow_screenshots/workflow1.jpeg">
+    <img src="workflow_screenshots/workflow1.jpeg" width="320"/>
+  </a>
+  <a href="workflow_screenshots/workflow2.jpeg">
+    <img src="workflow_screenshots/workflow2.jpeg" width="320"/>
+  </a>
+</p>
+
+<p align="center"><i>Key sections of the workflow including intent classification, activity extraction, and response handling.</i></p>
 
 ---
 
@@ -34,11 +120,11 @@ The system understands the input, extracts useful information, and saves it in G
 
 1. User sends a message through Telegram
 2. Voice input is converted into text
-3. The message is cleaned and standardized
-4. AI classifies the intent (activity, analytics, email, or chat)
-5. Activity data is extracted and structured
+3. AI cleans and understands the message
+4. Intent is classified
+5. Activity data is extracted
 6. Data is stored in Google Sheets
-7. A response is sent back to the user
+7. A response is sent back
 
 ---
 
@@ -56,81 +142,25 @@ LifeTracker-Bot/
 
 ## Setup Instructions
 
-1. Clone the repository:
+1. Clone the repository
 
-   ```
-   git clone https://github.com/SudharsaaX/LifeTracker-Bot.git
-   ```
+```
+git clone https://github.com/SudharsaaX/LifeTracker-Bot.git
+```
 
-2. Open n8n and import the workflow file:
+2. Import the workflow into n8n
 
-   * LifeTracker_Bot-n8n_filtered.json
+* LifeTracker_Bot-n8n_filtered.json
 
-3. Configure the required credentials:
+3. Configure credentials
 
-   * Telegram Bot API
-   * OpenAI API
-   * Google Sheets API
-   * AssemblyAI API
+* Telegram Bot API
+* OpenAI API
+* Google Sheets API
+* AssemblyAI API
 
 4. Activate the workflow
 
----
-
-## Screenshots
-## Telegram Interaction
-
-### Full Interaction View
-
-<p align="center">
-  <a href="telegram_screenshots/telegram-0.jpeg">
-    <img src="telegram_screenshots/telegram-0.jpeg" width="800"/>
-  </a>
-</p>
-
----
-
-### Interaction Breakdown
-
-<p align="center">
-  <a href="telegram_screenshots/telegram-1.jpeg">
-    <img src="telegram_screenshots/telegram-1.jpeg" width="280"/>
-  </a>
-  <a href="telegram_screenshots/telegram-2.jpeg">
-    <img src="telegram_screenshots/telegram-2.jpeg" width="280"/>
-  </a>
-  <a href="telegram_screenshots/telegram-3.jpeg">
-    <img src="telegram_screenshots/telegram-3.jpeg" width="280"/>
-  </a>
-</p>
-
----
-
-### Additional Examples
-
-<p align="center">
-  <a href="telegram_screenshots/telegram-4.jpeg">
-    <img src="telegram_screenshots/telegram-4.jpeg" width="280"/>
-  </a>
-  <a href="telegram_screenshots/telegram-5.jpeg">
-    <img src="telegram_screenshots/telegram-5.jpeg" width="280"/>
-  </a>
-  <a href="telegram_screenshots/telegram-6.jpeg">
-    <img src="telegram_screenshots/telegram-6.jpeg" width="280"/>
-  </a>
-</p>
-
-
-## Workflow Overview
-
-![Full Workflow](workflow_screenshots/complete-workflow.jpeg)
-
-## Workflow Breakdown
-
-<p align="center">
-  <img src="workflow_screenshots/workflow1.jpeg" width="280"/>
-  <img src="workflow_screenshots/workflow2.jpeg" width="280"/>
-</p>
 ---
 
 ## Example Usage
@@ -146,17 +176,17 @@ Any important emails?
 
 ## Notes
 
-Make sure to replace all API keys and credentials with your own before running the workflow.
-Do not upload sensitive information to public repositories.
+Replace all API keys with your own before running.
+Do not expose sensitive credentials.
 
 ---
 
 ## Future Improvements
 
-* Visual dashboard for analytics
+* Analytics dashboard
 * Weekly and monthly reports
 * Habit tracking
-* Reminder system
+* Notifications and reminders
 
 ---
 
@@ -166,7 +196,3 @@ Sudharsan
 https://github.com/SudharsaaX
 
 ---
-
-## License
-
-This project is for learning and personal use.
